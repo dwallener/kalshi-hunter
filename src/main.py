@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 
 from src.ingest.kalshi_ingest import ingest_kalshi_markets
 from src.ingest.polymarket_ingest import ingest_polymarket_markets
+from src.ingest.watchlist_ingest import refresh_watchlist_markets
 from src.match.market_matcher import build_candidate_pairs, export_matched_pairs, load_manual_pairs
 from src.normalize.schema import MatchedPair, NormalizedMarket
 from src.score.anomaly_score import export_anomaly_reports, score_pairs
@@ -91,6 +92,7 @@ def build_parser() -> argparse.ArgumentParser:
     add_ingest_parser("ingest-polymarket")
     add_ingest_parser("ingest-kalshi")
     add_ingest_parser("ingest-all")
+    subparsers.add_parser("refresh-watchlist")
 
     subparsers.add_parser("match-markets")
     subparsers.add_parser("score-anomalies")
@@ -129,6 +131,13 @@ def main() -> None:
             query=args.query,
             category=args.category,
             limit=limit,
+            raw_root=raw_root,
+            normalized_root=normalized_root,
+        )
+        return
+
+    if args.command == "refresh-watchlist":
+        refresh_watchlist_markets(
             raw_root=raw_root,
             normalized_root=normalized_root,
         )

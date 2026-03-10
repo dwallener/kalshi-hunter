@@ -6,6 +6,8 @@ from pathlib import Path
 import pandas as pd
 import yaml
 
+from src.ingest.watchlist_ingest import extract_kalshi_ticker, extract_polymarket_slug
+
 
 def _safe_read_csv(path: str | Path) -> pd.DataFrame:
     target = Path(path)
@@ -128,8 +130,12 @@ def build_watchlist_frame(
     for _, pair in manual.iterrows():
         kalshi_url = _normalize_url(pair.get("kalshi_url"))
         polymarket_url = _normalize_url(pair.get("polymarket_url"))
-        kalshi_ticker = _normalize_text(pair.get("kalshi_ticker"))
-        polymarket_slug = _normalize_text(pair.get("polymarket_slug"))
+        kalshi_ticker = _normalize_text(pair.get("kalshi_ticker")) or (
+            extract_kalshi_ticker(kalshi_url) if kalshi_url else None
+        )
+        polymarket_slug = _normalize_text(pair.get("polymarket_slug")) or (
+            extract_polymarket_slug(polymarket_url) if polymarket_url else None
+        )
         match = None
         kalshi_market = None
         polymarket_market = None
@@ -149,6 +155,8 @@ def build_watchlist_frame(
         if not kalshi_markets.empty:
             if kalshi_url and "market_url" in kalshi_markets:
                 matched_kalshi = kalshi_markets[kalshi_markets["market_url"] == kalshi_url]
+                if matched_kalshi.empty and kalshi_ticker and "ticker" in kalshi_markets:
+                    matched_kalshi = kalshi_markets[kalshi_markets["ticker"] == kalshi_ticker]
             elif kalshi_ticker and "ticker" in kalshi_markets:
                 matched_kalshi = kalshi_markets[kalshi_markets["ticker"] == kalshi_ticker]
             else:
@@ -158,6 +166,9 @@ def build_watchlist_frame(
         if not polymarket_markets.empty:
             if polymarket_url and "market_url" in polymarket_markets:
                 matched_poly = polymarket_markets[polymarket_markets["market_url"] == polymarket_url]
+                if matched_poly.empty and polymarket_slug and "market_url" in polymarket_markets:
+                    target_url = f"https://polymarket.com/event/{polymarket_slug}"
+                    matched_poly = polymarket_markets[polymarket_markets["market_url"] == target_url]
             elif polymarket_slug and "market_url" in polymarket_markets:
                 target_url = polymarket_slug if polymarket_slug.startswith("http") else f"https://polymarket.com/event/{polymarket_slug}"
                 matched_poly = polymarket_markets[polymarket_markets["market_url"] == target_url]
@@ -169,8 +180,12 @@ def build_watchlist_frame(
         row = {
             "label": pair.get("label"),
             "seed_notes": pair.get("notes"),
-            "kalshi_url": kalshi_url,
-            "polymarket_url": polymarket_url,
+            "kalshi_url": kalshi_url
+            or (kalshi_market.get("market_url") if kalshi_market is not None else None)
+            or (match.get("kalshi_market_url") if match is not None else None),
+            "polymarket_url": polymarket_url
+            or (polymarket_market.get("market_url") if polymarket_market is not None else None)
+            or (match.get("polymarket_slug") if match is not None else None),
             "kalshi_ref": kalshi_ticker or kalshi_url,
             "polymarket_ref": polymarket_slug or polymarket_url,
             "seed_resolved": kalshi_market is not None and polymarket_market is not None,

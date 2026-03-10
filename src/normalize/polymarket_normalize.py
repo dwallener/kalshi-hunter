@@ -119,7 +119,7 @@ def normalize_polymarket_market(
         category=category,
         rules_text=rules_text,
         source_url=raw_market.get("resolutionSource") or raw_market.get("resolution_source"),
-        market_url=f"https://polymarket.com/event/{slug}" if slug else None,
+        market_url=raw_market.get("market_url") or (f"https://polymarket.com/event/{slug}" if slug else None),
         open_time=parse_datetime(raw_market.get("startDate") or raw_market.get("start_date")),
         close_time=parse_datetime(raw_market.get("endDate") or raw_market.get("end_date") or raw_market.get("end_date_iso")),
         expiration_time=parse_datetime(raw_market.get("endDate") or raw_market.get("end_date") or raw_market.get("end_date_iso")),

@@ -200,7 +200,7 @@ with config_tab:
             hide_index=True,
         )
     st.code(
-        "python -m src.main match-markets\npython -m src.main score-anomalies\nstreamlit run streamlit_app.py",
+        "python -m src.main refresh-watchlist\npython -m src.main match-markets\npython -m src.main score-anomalies\nstreamlit run streamlit_app.py",
         language="bash",
     )
     st.caption(f"Repo root: {Path.cwd()}")

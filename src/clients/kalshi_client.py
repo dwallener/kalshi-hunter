@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 from typing import Any
+from urllib.parse import urlparse
 
 from src.utils.http import HttpClient
 
@@ -190,6 +191,80 @@ class KalshiClient:
     def get_market_details(self, ticker: str) -> Any:
         payload = self.http.get_json(f"{self.base_url}/markets/{ticker}")
         return payload.get("market", payload)
+
+    def list_markets_for_series(self, series_ticker: str, *, limit: int = 500) -> list[dict[str, Any]]:
+        filtered: list[dict[str, Any]] = []
+        cursor: str | None = None
+        page_size = min(max(min(limit, 100), 50), 100)
+        max_pages = max(1, (limit + page_size - 1) // page_size + 2)
+        for _ in range(max_pages):
+            params: dict[str, Any] = {
+                "limit": page_size,
+                "series_ticker": series_ticker.upper(),
+            }
+            if cursor:
+                params["cursor"] = cursor
+            payload = self.http.get_json(f"{self.base_url}/markets", params=params)
+            markets = payload.get("markets", [])
+            if not markets:
+                break
+            filtered.extend(markets)
+            if len(filtered) >= limit:
+                return filtered[:limit]
+            cursor = payload.get("cursor")
+            if not cursor:
+                break
+        return filtered
+
+    def find_market_by_url(self, market_url: str, *, status: str | None = None) -> dict[str, Any] | None:
+        target = market_url.rstrip("/").lower()
+        path_parts = [part for part in urlparse(target).path.strip("/").split("/") if part]
+        target_series = path_parts[1] if len(path_parts) >= 2 else None
+        target_event = path_parts[2] if len(path_parts) >= 3 else None
+        target_ticker = path_parts[-1] if path_parts else None
+        cursor: str | None = None
+        page_size = 100
+        max_pages = 30
+        for _ in range(max_pages):
+            params: dict[str, Any] = {
+                "limit": page_size,
+                "with_nested_markets": "true",
+            }
+            if status:
+                params["status"] = status
+            if cursor:
+                params["cursor"] = cursor
+            payload = self.http.get_json(f"{self.base_url}/events", params=params)
+            events = payload.get("events", [])
+            if not events:
+                break
+            for event in events:
+                for market in event.get("markets") or []:
+                    ticker = str(market.get("ticker") or "").strip()
+                    candidate_urls = {
+                        f"https://kalshi.com/markets/{ticker}".rstrip("/").lower(),
+                    }
+                    series_ticker = event.get("series_ticker")
+                    event_ticker = event.get("event_ticker")
+                    if series_ticker and event_ticker and ticker:
+                        candidate_urls.add(
+                            f"https://kalshi.com/markets/{series_ticker.lower()}/{event_ticker.lower()}/{ticker.lower()}".rstrip("/").lower()
+                        )
+                    ticker_match = target_ticker and ticker.lower() == target_ticker.lower()
+                    series_match = not target_series or (series_ticker and series_ticker.lower() == target_series.lower())
+                    event_match = not target_event or (event_ticker and event_ticker.lower() == target_event.lower())
+                    if target in candidate_urls or (ticker_match and series_match) or (ticker_match and event_match):
+                        merged_market = dict(market)
+                        merged_market.setdefault("event_ticker", event_ticker)
+                        merged_market.setdefault("category", event.get("category"))
+                        merged_market.setdefault("series_ticker", series_ticker)
+                        merged_market.setdefault("event_title", event.get("title"))
+                        merged_market.setdefault("event_sub_title", event.get("sub_title"))
+                        return merged_market
+            cursor = payload.get("cursor")
+            if not cursor:
+                break
+        return None
 
     def get_order_book(self, ticker: str) -> Any:
         payload = self.http.get_json(f"{self.base_url}/markets/{ticker}/orderbook")

@@ -83,6 +83,7 @@ Pipeline commands:
 
 ```bash
 python -m src.main ingest-all --category politics --limit 200
+python -m src.main refresh-watchlist
 python -m src.main match-markets
 python -m src.main score-anomalies
 python -m src.main full-refresh --category politics --limit 200

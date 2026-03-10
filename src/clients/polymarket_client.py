@@ -148,3 +148,9 @@ class PolymarketClient:
 
     def get_last_trade_price(self, token_id: str) -> Any:
         return self.http.get_json(f"{self.clob_base}/last-trade-price", params={"token_id": token_id})
+
+    def get_market_by_slug(self, slug: str) -> dict[str, Any]:
+        return self.http.get_json(f"{self.gamma_base}/markets/slug/{slug}")
+
+    def get_event_by_slug(self, slug: str) -> dict[str, Any]:
+        return self.http.get_json(f"{self.gamma_base}/events/slug/{slug}")

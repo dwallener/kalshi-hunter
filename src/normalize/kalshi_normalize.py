@@ -62,7 +62,7 @@ def normalize_kalshi_market(
         category=category,
         rules_text=rules_text,
         source_url=source_url,
-        market_url=f"https://kalshi.com/markets/{raw_market['ticker']}",
+        market_url=raw_market.get("market_url") or f"https://kalshi.com/markets/{raw_market['ticker']}",
         open_time=parse_datetime(raw_market.get("open_time")),
         close_time=parse_datetime(raw_market.get("close_time")),
         expiration_time=parse_datetime(raw_market.get("expiration_time")),
