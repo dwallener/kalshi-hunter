@@ -72,12 +72,12 @@ st.info(
 )
 
 metric_cols = st.columns(6)
-metric_cols[0].metric("Seeded Pairs", metrics["seeded_total"])
-metric_cols[1].metric("Resolved Seeds", metrics["seeded_resolved"])
-metric_cols[2].metric("Candidate-Resolved", metrics["candidate_resolved"])
-metric_cols[3].metric("Top Seed Divergence", _format_divergence(metrics["top_divergence"]))
-metric_cols[4].metric("Seeds With Prices", metrics["seeded_with_prices"])
-metric_cols[5].metric("Candidate Pairs", metrics["candidate_pairs"])
+metric_cols[0].metric("Seeded Pairs", metrics.get("seeded_total", 0))
+metric_cols[1].metric("Resolved Seeds", metrics.get("seeded_resolved", 0))
+metric_cols[2].metric("Candidate-Resolved", metrics.get("candidate_resolved", 0))
+metric_cols[3].metric("Top Seed Divergence", _format_divergence(metrics.get("top_divergence", 0.0)))
+metric_cols[4].metric("Seeds With Prices", metrics.get("seeded_with_prices", 0))
+metric_cols[5].metric("Candidate Pairs", metrics.get("candidate_pairs", 0))
 
 watchlist_tab, anomalies_tab, candidates_tab, config_tab = st.tabs(
     ["Seed Watchlist", "Anomaly Report", "Candidate Pairs", "Manual Seeds"]
