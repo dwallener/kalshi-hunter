@@ -12,6 +12,10 @@ from src.app.dashboard_data import (
     load_candidate_pairs,
     load_manual_pairs,
 )
+from src.ingest.watchlist_ingest import refresh_watchlist_markets
+from src.main import load_normalized_markets, load_settings
+from src.match.market_matcher import build_candidate_pairs, export_matched_pairs, load_manual_pairs as load_manual_seed_pairs
+from src.score.anomaly_score import export_anomaly_reports, score_pairs
 
 
 st.set_page_config(
@@ -63,13 +67,73 @@ def _format_divergence(value: object) -> str:
     return f"{float(value):.3f}"
 
 
+def run_live_refresh() -> None:
+    settings = load_settings()
+    refresh_watchlist_markets(
+        raw_root=settings["paths"]["raw_root"],
+        normalized_root=settings["paths"]["normalized_root"],
+    )
+    kalshi_markets = load_normalized_markets(settings["paths"]["normalized_root"], "kalshi")
+    polymarket_markets = load_normalized_markets(settings["paths"]["normalized_root"], "polymarket")
+    manual_pairs = load_manual_seed_pairs("config/manual_pairs.yaml")
+    pairs = build_candidate_pairs(
+        kalshi_markets,
+        polymarket_markets,
+        high_confidence_threshold=settings["matching"]["high_confidence_threshold"],
+        manual_review_threshold=settings["matching"]["manual_review_threshold"],
+        manual_pairs=manual_pairs,
+    )
+    export_matched_pairs(
+        pairs,
+        matched_root=settings["paths"]["matched_root"],
+        high_confidence_threshold=settings["matching"]["high_confidence_threshold"],
+    )
+    export_anomaly_reports(score_pairs(pairs), reports_root=settings["paths"]["reports_root"])
+
+
+def maybe_bootstrap_cloud_data(
+    watchlist: pd.DataFrame,
+    candidate_pairs: pd.DataFrame,
+    anomaly_report: pd.DataFrame,
+    metrics: dict[str, int | float],
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, dict[str, int | float]]:
+    already_attempted = st.session_state.get("cloud_bootstrap_attempted", False)
+    has_prices = bool(metrics.get("seeded_with_prices", 0))
+    if already_attempted or has_prices:
+        return watchlist, candidate_pairs, anomaly_report, metrics
+
+    st.session_state["cloud_bootstrap_attempted"] = True
+    with st.spinner("Fetching live watchlist data..."):
+        try:
+            run_live_refresh()
+        except Exception as exc:  # pragma: no cover - streamlit runtime path
+            st.error(f"Live refresh failed: {exc}")
+            return watchlist, candidate_pairs, anomaly_report, metrics
+    st.cache_data.clear()
+    return load_dashboard_data()
+
+
 watchlist, candidate_pairs, anomaly_report, metrics = load_dashboard_data()
+watchlist, candidate_pairs, anomaly_report, metrics = maybe_bootstrap_cloud_data(
+    watchlist,
+    candidate_pairs,
+    anomaly_report,
+    metrics,
+)
 
 st.title("kalshi-hunter")
 st.caption("Public, file-based dashboard for seeded cross-venue market monitoring.")
 st.info(
     "This app flags cross-venue anomalies for review. It does not prove venue exposure, manipulation, or settlement misconduct."
 )
+
+action_cols = st.columns([1, 5])
+if action_cols[0].button("Refresh Live Data", use_container_width=True):
+    with st.spinner("Refreshing live watchlist and reports..."):
+        run_live_refresh()
+    st.cache_data.clear()
+    st.rerun()
+action_cols[1].caption("Community Cloud runs from the repo only. This button fetches the seeded watchlist and rebuilds local artifacts inside the app container.")
 
 metric_cols = st.columns(6)
 metric_cols[0].metric("Seeded Pairs", metrics.get("seeded_total", 0))
