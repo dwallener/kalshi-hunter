@@ -5,4 +5,5 @@ python-dotenv
 pyyaml
 rapidfuzz
 pytest
-streamlit
+streamlit>=1.39,<2
+altair<6
