@@ -45,6 +45,16 @@ st.markdown(
     h1, h2, h3 {
         letter-spacing: -0.02em;
     }
+    .repo-cta {
+        display: inline-block;
+        margin-top: 1rem;
+        padding: 0.8rem 1.1rem;
+        border-radius: 999px;
+        background: #0b5cab;
+        color: #ffffff !important;
+        text-decoration: none;
+        font-weight: 600;
+    }
     </style>
     """,
     unsafe_allow_html=True,
@@ -318,6 +328,15 @@ def render_app() -> None:
             language="bash",
         )
         st.caption(f"Repo root: {Path.cwd()}")
+
+    st.markdown(
+        '<div style="text-align: center; margin-top: 2rem;">'
+        '<a class="repo-cta" href="https://github.com/dwallener/kalshi-hunter" target="_blank" rel="noopener noreferrer">'
+        "Take Me To The Repo"
+        "</a>"
+        "</div>",
+        unsafe_allow_html=True,
+    )
 
 
 try:
