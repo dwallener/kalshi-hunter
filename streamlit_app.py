@@ -229,10 +229,17 @@ def render_app() -> None:
                 chart_data = (
                     table[["label", "absolute_divergence"]]
                     .dropna()
-                    .set_index("label")
                     .sort_values("absolute_divergence", ascending=False)
                 )
-                st.bar_chart(chart_data)
+                st.caption("Top seeded divergences")
+                st.dataframe(
+                    chart_data,
+                    use_container_width=True,
+                    hide_index=True,
+                    column_config={
+                        "absolute_divergence": st.column_config.NumberColumn("Abs Divergence", format="%.3f"),
+                    },
+                )
 
     with anomalies_tab:
         st.subheader("Anomaly Report")
