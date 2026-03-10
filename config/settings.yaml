@@ -1,0 +1,21 @@
+project:
+  name: kalshi-hunter
+  default_category: politics
+  default_limit: 200
+
+paths:
+  raw_root: data/raw
+  normalized_root: data/normalized
+  matched_root: data/matched
+  reports_root: data/reports
+
+matching:
+  high_confidence_threshold: 0.75
+  manual_review_threshold: 0.55
+  max_time_gap_hours: 168
+
+scoring:
+  price_divergence_weight: 0.40
+  close_time_mismatch_weight: 0.20
+  rules_ambiguity_weight: 0.20
+  status_mismatch_weight: 0.20

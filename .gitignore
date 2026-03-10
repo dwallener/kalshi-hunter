@@ -1,0 +1,13 @@
+.env
+.pytest_cache/
+__pycache__/
+*.pyc
+*.pyo
+*.DS_Store
+data/raw/**/*.json
+data/raw/**/*.json.gz
+data/normalized/*.jsonl
+data/normalized/*.csv
+data/matched/*.csv
+data/reports/*.csv
+data/reports/*.md

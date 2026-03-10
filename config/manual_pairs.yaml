@@ -1,0 +1,40 @@
+pairs:
+  - kalshi_url: "https://kalshi.com/markets/kxfeddecision/fed-meeting/kxfeddecision-26mar"
+    polymarket_url: "https://polymarket.com/event/fed-decision-in-march-885"
+    label: "March Fed decision"
+    notes: "User-provided comparable pair for FOMC decision tracking."
+
+  - kalshi_url: "https://kalshi.com/markets/kxpresnomd/democratic-primary-winner/kxpresnomd-28"
+    polymarket_url: "https://polymarket.com/event/democratic-presidential-nominee-2028"
+    label: "2028 Democratic nominee"
+    notes: "User-provided comparable pair for nominee market tracking."
+
+  - kalshi_url: "https://kalshi.com/markets/kxcreditrating/us-credit-rating-downgrade/kxcreditrating-26dec31"
+    polymarket_url: "https://polymarket.com/event/another-us-debt-downgrade-before-2027"
+    label: "US debt downgrade"
+    notes: "User-provided comparable pair showing live divergence."
+
+  - kalshi_ticker: "KXZELENSKYPUTIN-29-26JUL"
+    polymarket_slug: "will-putin-meet-with-zelenskyy-by-june-30-2026"
+    label: "Putin-Zelenskyy meet by late June 2026"
+    notes: "Near-equivalent timing market. Kalshi cutoff is before Jul 1, 2026 and Polymarket cutoff is by June 30, 2026."
+
+  - kalshi_ticker: "KXPUTINDJTLOCATION-29-TUR"
+    polymarket_slug: "will-trump-and-putin-meet-next-in-turkey-182-161-789"
+    label: "Trump-Putin next meet in Turkey"
+    notes: "Exact location-style seed."
+
+  - kalshi_ticker: "KXPUTINDJTLOCATION-29-RUS"
+    polymarket_slug: "will-trump-and-putin-meet-next-in-russia-594-493-482"
+    label: "Trump-Putin next meet in Russia"
+    notes: "Exact location-style seed."
+
+  - kalshi_ticker: "KXPUTINDJTLOCATION-29-PRC"
+    polymarket_slug: "will-trump-and-putin-meet-next-in-china-586-328"
+    label: "Trump-Putin next meet in China"
+    notes: "Exact location-style seed."
+
+  - kalshi_ticker: "KXPUTINDJTLOCATION-29-UAE"
+    polymarket_slug: "will-trump-and-putin-meet-next-in-a-gulf-country-733-116"
+    label: "Trump-Putin next meet in Gulf country"
+    notes: "Approximate seed. Kalshi contract is UAE-specific while Polymarket groups Gulf countries."

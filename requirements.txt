@@ -1,0 +1,8 @@
+requests
+pandas
+pydantic
+python-dotenv
+pyyaml
+rapidfuzz
+pytest
+streamlit
