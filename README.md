@@ -2,6 +2,8 @@
 
 Local Python MVP for cross-venue prediction-market anomaly detection.
 
+<img width="1428" height="807" alt="Screenshot 2026-03-10 at 9 08 54 AM" src="https://github.com/user-attachments/assets/1b48ebca-ad49-4ed9-be3a-a7c0af45621d" />
+
 ## Purpose
 
 This repo ingests comparable Kalshi and Polymarket markets, normalizes them into one schema, matches likely equivalents, and ranks first-pass anomalies for analyst review.
